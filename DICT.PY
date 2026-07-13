@@ -1,3 +1,4 @@
+from cryptography.fernet import Fernet
 import random
 import os
 import time
@@ -16,6 +17,32 @@ def autogenerate():
                   return password
             continue
         
+def create_key_path():
+            print("\nPLEASE NOTE: your password is kept sucure by encrypting them before storage,\naccesing them require only a key that is created and stored internally in your pc as a file, so you and only you can acces your passwords\nif the file get deleted you will not be able to acces your passwords")
+            key=Fernet.generate_key()
+            with open("secure.key", "wb") as key_file:
+                  key_file.write(key)
+
+
+def encrypt_password(password):
+      if not os.path.exists("secure.key"):
+            create_key_path()
+
+      with open("secure.key", "rb") as key:
+            key=key.read()
+      key = Fernet(key)
+      encrypted=key.encrypt(password.encode())
+      return encrypted.decode()
+
+
+def decrypt_password(password):
+      with open("secure.key", "rb") as key:
+            pass_key=key.read()
+            pass_key = Fernet(pass_key)
+            passkey=pass_key.decrypt(password)
+            return passkey.decode()
+      
+
 
 def create_password(): # used when user wants to self create a password
       while True:
@@ -109,7 +136,7 @@ def Edit_password():
                                     elif user_choice == "2":
                                           edited=create_password()
                                           break
-                              print(f"{password}: {passwords[password]}")
+                              print(f"{password}: {edited}")
                               save=input("Save changes? Y/N: ").lower()
                               if save == "y":
                                     add_to_list(password,edited)
@@ -121,8 +148,8 @@ def Edit_password():
 def Add_to_file():
       with open("temppwd.db","w") as file:
             for key,value in passwords.items():
+                  value=encrypt_password(value)
                   file.write(f"{key}: {value}\n")
-            time.sleep(10)
       return True
       
 
@@ -134,6 +161,8 @@ def file_to_list():
                         if not password.strip():
                               continue
                         key,value=password.split(":",1)
+                        value=value.strip()
+                        value=decrypt_password(value)
                         passwords[key]=value.strip()
       except FileNotFoundError:
             open("password.db", "x")
@@ -150,7 +179,7 @@ passwords={
 
 def Menu():
       print("\n-----------Menu----------")
-      choice=input("1: Add password\n2: View all passwords\n3: Search password\n4: Delete password\n5: Edit password\n6: Exit\nn?: ")
+      choice=input("1: Add password\n2: View all passwords\n3: Search password\n4: Delete password\n5: Edit password\n6: Exit\n?: ")
       print()
       return choice
 
