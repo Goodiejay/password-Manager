@@ -71,9 +71,7 @@ def add_to_list(key,value):# add password and key to dict
       
 
 
-# this could be easily written directly where it is being called
-# but it is being called more than once i guess
-#is it still uneccesery?
+
 def Check_list(dictionary):
     if not dictionary: 
       return True 
